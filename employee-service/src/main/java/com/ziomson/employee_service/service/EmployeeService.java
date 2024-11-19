@@ -3,15 +3,13 @@ package com.ziomson.employee_service.service;
 import com.ziomson.employee_service.dto.APIResponseDto;
 import com.ziomson.employee_service.dto.DepartmentDto;
 import com.ziomson.employee_service.dto.EmployeeDto;
+import com.ziomson.employee_service.dto.OrganizationDto;
 import com.ziomson.employee_service.entity.Employee;
 import com.ziomson.employee_service.repository.EmployeeRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @AllArgsConstructor
@@ -21,7 +19,8 @@ public class EmployeeService implements IEmployeeService {
     private ModelMapper modelMapper;
    // private RestTemplate restTemplate;
 // private WebClient webClient;
-private APIClient apiClient;
+private DepartmentAPIClient departmentApiClient;
+private OrganizationAPIClient organizationApiClient;
     @Override
     public EmployeeDto save(EmployeeDto employeeDto) {
 Employee employee = modelMapper.map(employeeDto, Employee.class);
@@ -45,8 +44,8 @@ return modelMapper.map(employee, EmployeeDto.class);
 //                .block();
 
 
-       DepartmentDto departmentDto =  apiClient.getDepartment(employee.getDepartmentCode());
-
+       DepartmentDto departmentDto =  departmentApiClient.getDepartment(employee.getDepartmentCode());
+        OrganizationDto organizationDto = organizationApiClient.getOrganization(employee.getOrganizationCode());
 
        EmployeeDto employeeDto = modelMapper.map(employee, EmployeeDto.class);
 
@@ -54,7 +53,28 @@ return modelMapper.map(employee, EmployeeDto.class);
         APIResponseDto apiResponseDto = new APIResponseDto();
         apiResponseDto.setEmployeeDto(employeeDto);
         apiResponseDto.setDepartmentDto(departmentDto);
-
+        apiResponseDto.setOrganizationDto(organizationDto);
        return apiResponseDto;
+    }
+
+    public APIResponseDto getDefaultDepartment(Long id, Exception exception) {
+
+
+        Employee employee = employeeRepository.findById(id).orElseThrow(()-> new RuntimeException("Employee not found"));
+        DepartmentDto departmentDto =  new DepartmentDto();
+        departmentDto.setDepartmentName("Dev Department");
+        departmentDto.setDepartmentDescription("Probably department service off");
+        departmentDto.setDepartmentCode("DSOFF");
+
+
+        EmployeeDto employeeDto = modelMapper.map(employee, EmployeeDto.class);
+
+
+        APIResponseDto apiResponseDto = new APIResponseDto();
+        apiResponseDto.setEmployeeDto(employeeDto);
+        apiResponseDto.setDepartmentDto(departmentDto);
+
+        return apiResponseDto;
+
     }
 }
