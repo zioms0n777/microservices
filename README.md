@@ -9,3 +9,9 @@
 - learning about all those dependencies
 
    
+🎉after update 🎉
+- added api-gateway, config-server, service-registry, organization-service and react front end basic implementation
+- api documentation department-service(webmvc ui)
+- eureka usage
+- rabbitmq first usage
+- bus-amqp
